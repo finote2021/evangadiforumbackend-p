@@ -1,9 +1,8 @@
 const express = require("express");
 const dbConnection = require("./dbConfig");
 require("dotenv").config();
-const path = require("path");
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 const cors = require("cors");
 
 // Import routes
@@ -14,7 +13,8 @@ const questionRoutes = require("./routes/questionRoute");
 // JSON middleware to extract JSON data
 app.use(express.json());
 const corsOptions = {
-  origin: "http://localhost:5173", // Replace with the allowed origin
+  // frontend is deployed separately (Vercel/Netlify); allow its origin plus local dev
+  origin: [process.env.FRONTEND_URL, "http://localhost:5173"].filter(Boolean),
 };
 
 app.use(cors(corsOptions));
@@ -28,11 +28,6 @@ app.use("/api/question", questionRoutes);
 
 // Answers routes middleware
 app.use("/api/answer", answerRoutes);
-
-// Catch-all handler for all other routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
 
 const start = async () => {
   try {
